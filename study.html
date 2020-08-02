@@ -5,17 +5,25 @@
     <title>Vue.js勉強用アプリ</title>
   </head>
   <body>
-    <!-- ルート定義で書いたコンポーネントを実際に反映させる要素には　router-view を使用する。
-    また、リンクを表示してページ遷移できる様にするために router-link を使用する -->
     <div id="app">
-      <router-link to ='/top'>トップページ</router-link>
-      <router-link :to ="{ name: 'user', params: { userId: 123 }}">ユーザー一覧ページ</router-link>
+      <nav>
+        <router-link to='/top'>トップページ</router-link>
+        <router-link to="/users">ユーザー一覧ページ</router-link>
+      </nav>
       <router-view ></router-view>
     </div>
     <script src="https://unpkg.com/vue@2.5.17"></script>
-    <script src="https://unpkg.com/vue-router@3.3.4/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/vue-router@3.3.4"></script>
+
+    <script type="text/x-temple" id="user-list">
+      <div>ユーザー一覧ページです</div>
+    </script>
 
     <script>
+    
+    var UserList = {
+      template: '#user-list',
+    };
     // ルートオプションを渡してルータインスタンスを作成
     var router = new VueRouter({
       routes: [
@@ -26,11 +34,8 @@
           }
         },
         {
-          path: '/user/:userId',
-          name: 'user',
-          component: {
-            template: '<div>ユーザーidは{{ $route.params.userId }} です。</div>'
-          }
+          path: '/users',
+          component: UserList
         }
       ]
     });
