@@ -15,34 +15,91 @@
     <script src="https://unpkg.com/vue@2.5.17"></script>
     <script src="https://unpkg.com/vue-router@3.3.4"></script>
 
-    <script type="text/x-temple" id="user-list">
-      <div>ユーザー一覧ページです</div>
+    <script type="text/x-template" id="user-list">
+      <div>
+        <div class="loading" v-if="loading">読み込み中...</div>
+        <div if="error" class="error">
+          {{ error }}
+        </div>
+        <!-- ユーザーがロードされたら各ユーザーの名前を表示する -->
+        <div v-for="user in users" :key="user.id">
+          <h2>{{ user.name }}</h2>
+        </div>
+      </div>
     </script>
 
     <script>
+      var getUsers = function (callback) {
+        setTimeout(function () {
+          callback(null, [
+            {
+              id: 1,
+              name: 'Takuya Tojima'
+            },
+            {
+              id: 2,
+              name: 'Yataro Iwasaki'
+            }
+          ])
+        }, 1000)
+      };
     
-    var UserList = {
-      template: '#user-list',
-    };
-    // ルートオプションを渡してルータインスタンスを作成
-    var router = new VueRouter({
-      routes: [
-        {
-          path: '/top',
-          component: {
-            template: '<div>トップページです</div>'
+      var UserList = {
+        // HTML上のidを指定する。
+        template: '#user-list',
+        data: function () {
+          return {
+            loading: false,
+            users: function () { return }, //初期の空の配列
+            error: null
           }
         },
-        {
-          path: '/users',
-          component: UserList
+        created: function () {
+          this.fetchData()
+        },
+
+        // $routeの変更をwatchすることでルーティングが変更された時にサイドでデータを取得
+        watch: {
+          '$route': 'fetchData'
+        },
+        methods: {
+          fetchData: function () {
+            this.loading = true
+            // 取得したデータの結果をuserに格納する
+            // Function.prototype.bindはthisはthisのスコープを渡すために必要
+            getUsers((function (err, users) {
+              this.loading = false
+              if (err) {
+                this.error = err.toString()
+              } else {
+                this.users = users
+              }
+            }).bind(this))
+          }
         }
-      ]
-    });
-    // ルーターのインスタンスをrootとなるvueインスタンスに渡す
-    var app = new Vue({
-      router: router
-    }).$mount('#app');
+
+      };
+
+
+      // ルートオプションを渡してルータインスタンスを作成
+      var router = new VueRouter({
+        routes: [
+          {
+            path: '/top',
+            component: {
+              template: '<div>トップページです。</div>'
+            }
+          },
+          {
+            path: '/users',
+            component: UserList
+          }
+        ]
+      });
+      // ルーターのインスタンスをrootとなるvueインスタンスに渡す
+      var app = new Vue({
+        router: router
+      }).$mount('#app');
 
     </script>
   </body>
