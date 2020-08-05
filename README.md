@@ -13,3 +13,6 @@
 
 ###コンポーネント内のフック関数
   コンポーネントのオプションとして beforeRouteEnter を使ってデータを取得する。
+
+##リストページの実装
+  Vue Router初期化時に/userへのアクセスとUserListコンポーネントをマッピングする。UserList コンポーネントが複雑になってもいいようにtext/x-templateを用いる。
