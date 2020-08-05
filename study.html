@@ -23,31 +23,91 @@
         </div>
         <!-- ユーザーがロードされたら各ユーザーの名前を表示する -->
         <div v-for="user in users" :key="user.id">
+          <router-link :to="{path: '/users/' + user.id }">{{ user.name }}</router-link>
+        </div>
+      </div>
+    </script>
+    <script type="text/x-template" id="user-detail">
+      <div>
+        <div class="loading" v-if="loading">読み込み中...</div>
+        <div v-if="error" class="error">
+          {{ error }}
+        </div>
+        <!-- ユーザーがロードされたら各ユーザーの名前を表示する -->
+        <div v-if="user">
           <h2>{{ user.name }}</h2>
+          <p>{{ user.description }}</p>
         </div>
       </div>
     </script>
 
+
     <script>
-      // この関数を用いて擬似的にwebAPI経由で情報を取得した様にする
+      var userData = [
+        {
+          id: 1,
+          name: 'Takuya Tojima',
+          description: "私は一秒間に卵を５個割ることができる"
+        },
+        {
+          id: 2,
+          name: 'Yataro Iwasaki',
+          description: '私は神だ'
+        },
+        {
+          id: 3,
+          name: '天上天下唯我独尊',
+          description: '天上天下唯我独尊'
+        }
+      ];
       var getUsers = function (callback) {
         setTimeout(function () {
-          callback(null, [
-            {
-              id: 1,
-              name: 'Takuya Tojima'
-            },
-            {
-              id: 2,
-              name: 'Yataro Iwasaki'
-            },
-            {
-              id: 3,
-              name: '天上天下唯我独尊'
-            }
-
-          ])
+          callback(null, userData)
+        })
+      };
+      // この関数を用いて擬似的にwebAPI経由で情報を取得した様にする
+      var getUser = function (userId, callback) {
+        setTimeout(function () {
+          var filteredUsers = userData.filter(function (user) {
+            // ユーザーIdを数列化している
+            return user.id === parseInt(userId, 10)
+          })
+          callback(null, filteredUsers && filteredUsers[0])
         }, 1000)
+      };
+
+      var UserDetail = {
+        template: '#user-detail',
+        data: function () {
+          return {
+            loading: false,
+            user: null,
+            error: null
+          }
+        },
+
+        created: function () {
+          this.fetchData()
+        },
+
+        watch: {
+          '$route': 'fetchData'
+        },
+
+        methods: {
+          fetchData: function () {
+            this.loading = true
+
+            getUser(this.$route.params.userId, (function (err, user) {
+              this.loading = false
+              if (err)  {
+                this.error = err.toString()
+              } else {
+                this.user = user
+              }
+            }).bind(this))
+          }
+        }
       };
     
       var UserList = {
@@ -99,6 +159,10 @@
           {
             path: '/users',
             component: UserList
+          },
+          {
+            path: '/users/:userId',
+            component: UserDetail
           }
         ]
       });
